@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Message Categories</h2>
+
+<div class="card">
+    <h3>Add New Category</h3>
+    <form method="post" action="/categories/add">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Message Category</label>
+                <input type="text" name="message_category" required>
+            </div>
+            <button type="submit" class="btn btn-success">Add Category</button>
+        </div>
+    </form>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Message Category</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
+        <tr>
+            <td>{{ category.message_category_id }}</td>
+            <td>{{ category.message_category }}</td>
+            <td>{{ category.row_created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+                <button class="btn btn-primary" onclick="openEditModal(
+                    {{ category.message_category_id }},
+                    '{{ category.message_category }}'
+                )">Edit</button>
+                <form method="post" action="/categories/delete/{{ category.message_category_id }}" style="display:inline">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this category?')">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="modal" id="editModal">
+    <div class="modal-content">
+        <h3>Edit Category</h3>
+        <form method="post" id="editForm">
+            <div class="form-group" style="margin-bottom:1rem">
+                <label>Message Category</label>
+                <input type="text" name="message_category" id="editMessageCategory" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-success">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openEditModal(id, message_category) {
+        document.getElementById('editForm').action = `/categories/edit/${id}`;
+        document.getElementById('editMessageCategory').value = message_category;
+        document.getElementById('editModal').classList.add('active');
+    }
+    function closeModal() {
+        document.getElementById('editModal').classList.remove('active');
+    }
+</script>
+{% endblock %}
