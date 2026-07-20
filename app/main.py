@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime, timezone
 from typing import Optional
+import uuid
 
 from app.database import get_db
 from app.models import Message, MessageCategory
@@ -72,7 +73,7 @@ async def delete_category(
 
 @app.get("/messages", response_class=HTMLResponse)
 async def list_messages(request: Request, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Message).order_by(Message.message_id))
+    result = await db.execute(select(Message).order_by(Message.row_id))
     messages = result.scalars().all()
     categories_result = await db.execute(select(MessageCategory).order_by(MessageCategory.message_category))
     categories = categories_result.scalars().all()
@@ -85,13 +86,13 @@ async def list_messages(request: Request, db: AsyncSession = Depends(get_db)):
 
 @app.post("/messages/add")
 async def add_message(
-    message_id: str = Form(...),
+    # message_id: str = Form(...),
     message_text: str = Form(...),
     message_category_id: int = Form(...),
     db: AsyncSession = Depends(get_db)
 ):
     message = Message(
-        message_id=message_id,
+        message_id=str(uuid.uuid4()),
         message_text=message_text,
         message_category_id=message_category_id
     )
