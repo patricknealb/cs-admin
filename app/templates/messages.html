@@ -6,12 +6,8 @@
     <h3>Add New Message</h3>
     <form method="post" action="/messages/add">
         <div class="form-row">
-            <!--<div class="form-group">
-                <label>Message ID</label>
-                <input type="text" name="message_id" required>
-            </div>-->
             <div class="form-group">
-                <label>MessageCategory</label>
+                <label>Category</label>
                 <select name="message_category_id" required>
                     {% for category in categories %}
                     <option value="{{ category.message_category_id }}">{{ category.message_category }}</option>
@@ -27,11 +23,34 @@
     </form>
 </div>
 
+<!-- Search Box -->
+<div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search messages..."
+        value="{{ q }}"
+        style="padding: 0.6rem 1rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; flex: 1;"
+    >
+    <button class="btn btn-danger" id="clearBtn" onclick="clearSearch()" style="display: {{ 'inline-block' if q else 'none' }}">
+        Clear
+    </button>
+</div>
+
+<!-- Result count -->
+<p style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 0.75rem;">
+    {% if q %}
+        {{ messages|length }} result(s) for "<strong>{{ q }}</strong>"
+    {% else %}
+        {{ messages|length }} message(s) total
+    {% endif %}
+</p>
+
 <table>
     <thead>
         <tr>
             <th>Message ID</th>
-            <th>Message Category</th>
+            <th>Category</th>
             <th>Message Text</th>
             <th>Created</th>
             <th>Actions</th>
@@ -40,7 +59,7 @@
     <tbody>
         {% for message in messages %}
         <tr>
-            <td>{{ message.message_id }}</td>
+            <td style="font-size:0.8rem; color:#999;">{{ message.message_id }}</td>
             <td>{{ message.message_category_id }}</td>
             <td>{{ message.message_text[:100] }}{% if message.message_text|length > 100 %}...{% endif %}</td>
             <td>{{ message.row_created_at.strftime('%Y-%m-%d %H:%M') }}</td>
@@ -56,9 +75,17 @@
             </td>
         </tr>
         {% endfor %}
+        {% if not messages %}
+        <tr>
+            <td colspan="5" style="text-align:center; color:#999; padding: 2rem;">
+                No messages found{% if q %} for "{{ q }}"{% endif %}.
+            </td>
+        </tr>
+        {% endif %}
     </tbody>
 </table>
 
+<!-- Edit Modal -->
 <div class="modal" id="editModal">
     <div class="modal-content">
         <h3>Edit Message</h3>
@@ -86,12 +113,29 @@
 
 {% block scripts %}
 <script>
+    // Live search
+    let searchTimer;
+    document.getElementById('searchInput').addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        const q = this.value;
+        document.getElementById('clearBtn').style.display = q ? 'inline-block' : 'none';
+        searchTimer = setTimeout(() => {
+            window.location.href = '/messages?q=' + encodeURIComponent(q);
+        }, 400); // 400ms debounce
+    });
+
+    function clearSearch() {
+        window.location.href = '/messages';
+    }
+
+    // Edit modal
     function openEditModal(rowId, messageText, categoryId) {
         document.getElementById('editForm').action = `/messages/edit/${rowId}`;
         document.getElementById('editText').value = messageText;
         document.getElementById('editCategory').value = categoryId;
         document.getElementById('editModal').classList.add('active');
     }
+
     function closeModal() {
         document.getElementById('editModal').classList.remove('active');
     }

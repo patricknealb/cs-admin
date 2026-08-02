@@ -72,15 +72,31 @@ async def delete_category(
 # ─── Messages ─────────────────────────────────────────────────────────────────
 
 @app.get("/messages", response_class=HTMLResponse)
-async def list_messages(request: Request, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Message).order_by(Message.row_id))
+async def list_messages(
+    request: Request,
+    q: str = "",
+    db: AsyncSession = Depends(get_db)
+):
+    if q:
+        result = await db.execute(
+            select(Message)
+            .where(Message.message_text.ilike(f"%{q}%"))
+            .order_by(Message.message_id)
+        )
+    else:
+        result = await db.execute(
+            select(Message).order_by(Message.message_id)
+        )
     messages = result.scalars().all()
-    categories_result = await db.execute(select(MessageCategory).order_by(MessageCategory.message_category))
+    categories_result = await db.execute(
+        select(MessageCategory).order_by(MessageCategory.message_category)
+    )
     categories = categories_result.scalars().all()
     return templates.TemplateResponse("messages.html", {
         "request": request,
         "messages": messages,
-        "categories": categories
+        "categories": categories,
+        "q": q
     })
 
 
