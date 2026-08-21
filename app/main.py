@@ -151,6 +151,22 @@ async def delete_message(
     return RedirectResponse(url="/messages", status_code=status.HTTP_303_SEE_OTHER)
 
 
+@app.post("/messages/publish/{row_id}")
+async def publish_message(
+    row_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Message).where(Message.row_id == row_id)
+    )
+    message = result.scalar_one_or_none()
+    if message:
+        message.published = not message.published  # toggle
+        message.row_updated_at = datetime.now(timezone.utc)
+        await db.commit()
+    return RedirectResponse(url="/messages", status_code=status.HTTP_303_SEE_OTHER)
+
+
 @app.get("/")
 async def root():
     return RedirectResponse(url="/messages")
