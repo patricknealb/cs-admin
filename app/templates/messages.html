@@ -82,8 +82,10 @@
             <td>
                 {% if message.email_verified == true %}
                     <span style="color: #2ecc71; font-weight: bold;">✓ Yes</span>
-                {% else %}
+                {% elif message.email_verified == false %}
                     <span style="color: #e74c3c; font-weight: bold;">✗ No</span>
+                {% else %}
+                    <span style="color: #bdc3c7;">— N/A</span>
                 {% endif %}
             </td>
             <td>{{ message.row_created_at.strftime('%Y-%m-%d %H:%M') }}</td>
