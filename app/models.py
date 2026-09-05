@@ -9,7 +9,7 @@ class MessageCategory(Base):
     message_category = Column(String, nullable=False)
     row_created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     row_updated_at = Column(TIMESTAMP(timezone=True), nullable=True)
-    
+
 class Message(Base):
     __tablename__ = "message"
     __table_args__ = {"schema": "cs_data"}
@@ -19,5 +19,7 @@ class Message(Base):
     message_text = Column(String, nullable=False)
     message_category_id = Column(Integer, ForeignKey("cs_data.message_category.message_category_id"), nullable=False)
     published = Column(Boolean, nullable=False, default=False)
+    external = Column(Boolean, nullable=False, default=False)
+    email_verified = Column(Boolean, nullable=False, default=False)
     row_created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     row_updated_at = Column(TIMESTAMP(timezone=True), nullable=True)

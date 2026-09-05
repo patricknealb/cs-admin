@@ -53,6 +53,8 @@
             <th>Category</th>
             <th>Message Text</th>
             <th>Status</th>
+            <th>External</th>
+            <th>Email Verified</th>
             <th>Created</th>
             <th>Actions</th>
         </tr>
@@ -68,6 +70,20 @@
                     <span style="color: #2ecc71; font-weight: bold;">✓ Published</span>
                 {% else %}
                     <span style="color: #e74c3c; font-weight: bold;">✗ Unpublished</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if message.external %}
+                    <span style="color: #3498db; font-weight: bold;">✓ Yes</span>
+                {% else %}
+                    <span style="color: #bdc3c7;">— No</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if message.email_verified %}
+                    <span style="color: #2ecc71; font-weight: bold;">✓ Yes</span>
+                {% else %}
+                    <span style="color: #e74c3c; font-weight: bold;">✗ No</span>
                 {% endif %}
             </td>
             <td>{{ message.row_created_at.strftime('%Y-%m-%d %H:%M') }}</td>
@@ -90,7 +106,7 @@
         {% endfor %}
         {% if not messages %}
         <tr>
-            <td colspan="6" style="text-align:center; color:#999; padding: 2rem;">
+            <td colspan="8" style="text-align:center; color:#999; padding: 2rem;">
                 No messages found{% if q %} for "{{ q }}"{% endif %}.
             </td>
         </tr>
