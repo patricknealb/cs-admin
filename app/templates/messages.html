@@ -46,16 +46,16 @@
     {% endif %}
 </p>
 
-<table>
+<table id="messagesTable">
     <thead>
         <tr>
-            <th>Message ID</th>
-            <th>Category</th>
-            <th>Message Text</th>
-            <th>Status</th>
-            <th>External</th>
-            <th>Email Verified</th>
-            <th>Created</th>
+            <th onclick="sortTable(0)" class="sortable">Message ID <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(1)" class="sortable">Category <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(2)" class="sortable">Message Text <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(3)" class="sortable">Status <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(4)" class="sortable">External <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(5)" class="sortable">Email Verified <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(6)" class="sortable">Created <span class="sort-icon">↕</span></th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -65,21 +65,21 @@
             <td style="font-size:0.8rem; color:#999;">{{ message.message_id }}</td>
             <td>{{ message.message_category_id }}</td>
             <td>{{ message.message_text[:100] }}{% if message.message_text|length > 100 %}...{% endif %}</td>
-            <td>
+            <td data-value="{{ 'Published' if message.published else 'Unpublished' }}">
                 {% if message.published %}
                     <span style="color: #2ecc71; font-weight: bold;">✓ Published</span>
                 {% else %}
                     <span style="color: #e74c3c; font-weight: bold;">✗ Unpublished</span>
                 {% endif %}
             </td>
-            <td>
+            <td data-value="{{ 'Yes' if message.external == true else 'No' }}">
                 {% if message.external == true %}
                     <span style="color: #3498db; font-weight: bold;">✓ Yes</span>
                 {% else %}
                     <span style="color: #bdc3c7;">— No</span>
                 {% endif %}
             </td>
-            <td>
+            <td data-value="{{ 'Yes' if message.email_verified == true else ('No' if message.email_verified == false else 'NA') }}">
                 {% if message.email_verified == true %}
                     <span style="color: #2ecc71; font-weight: bold;">✓ Yes</span>
                 {% elif message.email_verified == false %}
@@ -144,6 +144,50 @@
 
 {% block scripts %}
 <script>
+    // Sorting
+    let sortCol = -1;
+    let sortAsc = true;
+
+    function sortTable(col) {
+        const table = document.getElementById('messagesTable');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const headers = table.querySelectorAll('th.sortable');
+
+        // Toggle direction if same column
+        if (sortCol === col) {
+            sortAsc = !sortAsc;
+        } else {
+            sortCol = col;
+            sortAsc = true;
+        }
+
+        // Update header icons
+        headers.forEach((th, i) => {
+            th.classList.remove('sort-asc', 'sort-desc');
+            if (i === col) {
+                th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+            }
+        });
+
+        // Sort rows
+        rows.sort((a, b) => {
+            const aCell = a.querySelectorAll('td')[col];
+            const bCell = b.querySelectorAll('td')[col];
+
+            // Use data-value if available, otherwise use text content
+            const aVal = (aCell.dataset.value || aCell.textContent).trim().toLowerCase();
+            const bVal = (bCell.dataset.value || bCell.textContent).trim().toLowerCase();
+
+            if (aVal < bVal) return sortAsc ? -1 : 1;
+            if (aVal > bVal) return sortAsc ? 1 : -1;
+            return 0;
+        });
+
+        // Re-append sorted rows
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    
     // Live search
     let searchTimer;
     document.getElementById('searchInput').addEventListener('input', function() {
