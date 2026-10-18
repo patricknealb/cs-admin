@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, Depends, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
 from datetime import datetime, timezone
 from typing import Optional
@@ -11,6 +12,7 @@ from app.database import get_db
 from app.models import Message, MessageCategory
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 
